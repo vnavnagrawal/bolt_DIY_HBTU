@@ -29,3 +29,10 @@
     "vite": "^5.2.0"
   }
 }
+{
+  "name": "bolt-diy-project",
+  "packageManager": "pnpm@9.15.4", 
+  "engines": {
+    "node": "20.x"
+  }
+}
