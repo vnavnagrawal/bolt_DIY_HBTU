@@ -1,0 +1,68 @@
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
+import { FileText } from 'lucide-react';
+
+interface Newsletter {
+  id: string;
+  title: string;
+  pdf_url: string;
+  published_date: string;
+  created_at: string;
+}
+
+const NewslettersPage: React.FC = () => {
+  const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchNewsletters();
+  }, []);
+
+  const fetchNewsletters = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('newsletters')
+        .select('*')
+        .order('published_date', { ascending: false });
+
+      if (error) throw error;
+      setNewsletters(data || []);
+    } catch (err: any) {
+      setError('Failed to fetch newsletters: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <p>Loading newsletters...</p>;
+  if (error) return <p className="error-message">{error}</p>;
+
+  return (
+    <div className="newsletters-page">
+      <h2>Our Newsletters</h2>
+      <p>Stay updated with the latest news and happenings from our alumni community.</p>
+
+      {newsletters.length === 0 ? (
+        <p>No newsletters published yet. Check back soon!</p>
+      ) : (
+        <div className="card-grid">
+          {newsletters.map((newsletter) => (
+            <div key={newsletter.id} className="card" style={{ textAlign: 'left' }}>
+              <h3>{newsletter.title}</h3>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#555' }}>
+                <FileText size={16} /> Published: {new Date(newsletter.published_date).toLocaleDateString()}
+              </p>
+              <a href={newsletter.pdf_url} target="_blank" rel="noopener noreferrer" className="button" style={{ display: 'inline-block', marginTop: '1rem' }}>
+                Read Newsletter
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default NewslettersPage;
